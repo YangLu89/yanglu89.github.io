@@ -1,12 +1,12 @@
 # Site Info
-title:              "The Plain"
+title:              "Yang's Blog"
 description:        "The Plain is a Minimalist Jekyll theme that focuses on writing matters."
 google_verify:      epFgX0s_0RM3CdjwFcsewfXzPov2g8s9ZBOLyaIUH-o # Put your Google Verification here
 google_analytics:   UA-XXXXXXX-X # Put your Google Analytics code
 
 # Author Info
-author_name:        "Heiswayi Nrird"
-author_email:       hnrird@gmail.com
+author_name:        "Yang Lu"
+author_email:       yanglu6120@gmail.com
 author_gravatar:    2b38b1b0e7e08b69379bd61582adf0c8 # Gravatar md5 hash
 twitter_username:   HeiswayiNrird
 
@@ -17,6 +17,7 @@ timezone:           Asia/Kuala_Lumpur # https://en.wikipedia.org/wiki/List_of_tz
 
 # Site Build
 highlighter:        pygments
+paginate: 10
 #markdown:           redcarpet
 #redcarpet:
 #    extensions:     ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data", "highlight", "footnotes"]
@@ -29,8 +30,8 @@ sass:
 # Other Params
 include:            [ "robots.txt" ]
 exclude:            [ "LICENSE", "README.md", "CNAME", "vendor", "Gemfile" ]
-gems:
-  - jekyll-sitemap
+
+gems: [jekyll-paginate]
 
 compress_html:
     clippings:      all

@@ -3,20 +3,35 @@ layout: default
 ---
 
 <section>
-	<ul>
+	<hr>
+	{% for post in paginator.posts %}
+	<div class="post-preview">
+	    <div class="title">
+			<a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+		</div>
+		<div class="post-content-preview">
+        	{{ post.content | strip_html | truncate:200 }}
+    	</div>
+    	<p class="post-meta">
+	        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
+	    </p>
+	    <hr>
+	</div>
+	{% endfor %}
 
-		{% for post in site.posts %}
-
-		<li>
-			<div class="post-date">
-				<span>{{ post.date | date: "%b %d, %Y" }}</span>
-			</div>
-			<div class="title">
-				<a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-			</div>
-		</li>
-
-		{% endfor %}
-
-	</ul>
+	<!-- Pager -->
+	{% if paginator.total_pages > 1 %}
+	<div class="pager">
+	    {% if paginator.previous_page %}
+	    <div class="previous">
+	        <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
+	    </div>
+	    {% endif %}
+	    {% if paginator.next_page %}
+	    <div class="next">
+	        <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
+	    </div>
+	    {% endif %}
+	</div>
+	{% endif %}
 </section>
