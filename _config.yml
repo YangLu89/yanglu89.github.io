@@ -31,7 +31,7 @@ sass:
 include:            [ "robots.txt" ]
 exclude:            [ "LICENSE", "README.md", "CNAME", "vendor", "Gemfile" ]
 
-gems: [jekyll-paginate]
+gems: ["jekyll-paginate", "jekyll-sitemap"]
 
 compress_html:
     clippings:      all

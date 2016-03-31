@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Deploy Django Project to Openshift</title><meta name="twitter:card" content="summary" /><meta name="twitter:site" content="@HeiswayiNrird" /><meta name="twitter:title" content="Deploy Django Project to Openshift" /><meta name="twitter:description" content="OpenShift is Red Hat’s Platform-as-a-Service (PaaS) that allows developers to quickly develop, host, and scale applications in a cloud environment. I recently went througth the deployment process o..."><meta name="description" content="OpenShift is Red Hat’s Platform-as-a-Service (PaaS) that allows developers to quickly develop, host, and scale applications in a cloud environment. I recentl..."><meta name="google-site-verification" content="epFgX0s_0RM3CdjwFcsewfXzPov2g8s9ZBOLyaIUH-o"><link rel="icon" href="/assets/favicon.png"><link rel="apple-touch-icon" href="/assets/touch-icon.png"><link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css"><link rel="stylesheet" href="/assets/core.css"><link rel="canonical" href="/notes/deploy-django-project-to-openshift"><link rel="alternate" type="application/atom+xml" title="Yang's Blog" href="/feed.xml" /></head><body><div class="navbar"> <a class="about" href="/about">About</a> <a class="github" href="https://github.com/YangLu89/">GitHub</a> <a class="resume" href="#">Resume</a></div><aside class="logo"> <a href="/"> <img src="http://www.gravatar.com/avatar/2b38b1b0e7e08b69379bd61582adf0c8.png?s=80" class="gravatar"> </a> <span class="logo-prompt">Back to Home</span></aside><div class="summary"><h1 class="title"> Yang Lu</h1><p class="intro"> Backend Engineer at BloomSky</p></div><main> <noscript><style> article .footnotes { display: block; }</style></noscript><article><div class="center"><h1>Deploy Django Project to Openshift</h1><time>March 29, 2016</time></div><div class="divider"></div><p>OpenShift is Red Hat’s Platform-as-a-Service (PaaS) that allows developers to quickly develop, host, and scale applications in a cloud environment. I recently went througth the deployment process of a Django project on Openshift and would like to share the summarized the steps.</p><p>1.Set up an application on openshift using <strong>python 2.7 cartridge</strong>.</p><p>2.Clone your repository via git (you must first add the ssh key of your local machine to the openshift), and you will have a project directory like this</p><pre><code>YourProject /
+  wsgi.py
+  setup.py
+  .openshift /
+</code></pre><p>3.Create a directory <strong>wsgi/static</strong> with an empty dummy file <strong>.gitkeep</strong> under the <strong>YourProject folder</strong>, copy your django project into the <strong>YourProject</strong> folder, and you have your project directory like this</p><pre><code>YourProject /
+  wsgi.py
+  setup.py
+  .openshift /
+  wsgi /
+    static/
+      .gitkeep
+  yourdjangoproject /
+  static /
+  manage.py
+</code></pre><p>4.Include all the dependencies in the setup.py file</p><p>5.Edit the openshift-given WSGI script as follows.</p><pre><code class="language-python">#!/usr/bin/python
+import os
+virtenv = os.environ['OPENSHIFT_PYTHON_DIR'] + '/virtenv/'
+virtualenv = os.path.join(virtenv, 'bin/activate_this.py')
+try:
+    execfile(virtualenv, dict(__file__=virtualenv))
+except IOError:
+    pass
+
+from yourdjangoproject.wsgi import application
+
+</code></pre><p>6.Edit the hooks in <strong>.openshift/action_hooks</strong> to automatically perform db sincronization and media management, create two files named <strong>build</strong> and <strong>deploy</strong>.</p><p>build hook</p><pre><code>#!/bin/bash
+#this is .openshift/action/hooks/build
+#remember to make it +x so openshift can run it.
+if [ ! -d ${OPENSHIFT_DATA_DIR}media ]; then
+    mkdir -p ${OPENSHIFT_DATA_DIR}media
+fi
+ln -snf ${OPENSHIFT_DATA_DIR}media $OPENSHIFT_REPO_DIR/wsgi/static/media
+######################### end of file
+
+</code></pre><p>deploy hook</p><pre><code>#!/bin/bash
+#this one is the deploy hook .openshift/action_hooks/deploy
+source $OPENSHIFT_HOMEDIR/python/virtenv/bin/activate
+cd $OPENSHIFT_REPO_DIR
+echo "Executing 'python manage.py migrate'"
+python manage.py migrate
+echo "Executing 'python manage.py collectstatic --noinput'"
+python manage.py collectstatic --noinput
+########################### end of file
+
+</code></pre><p>7.Edit the django setting.py file to tell the location of the static files</p><pre><code class="language-python">STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'wsgi', 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'wsgi', 'static', 'media')
+= (os.path.join(BASE_DIR, 'static'),)
+TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
+</code></pre><p>8.Add ‘django.contrib.staticfiles’ to the installed apps in Django settings.py file, and run manage.py collectstatic, then you’ll have the static files in wsgi/static folder, this is the folder where openshift looks for static files.</p><p>9.Finally push the changes to github, and your application should mount.</p><p>10.If you get errors you can always ssh to the openshift application instance and check the python-log under the app-root folder.</p></article><div class="back"> <a href="/">Back</a></div></main></body></html>

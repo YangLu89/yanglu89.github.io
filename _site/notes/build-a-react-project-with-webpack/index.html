@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Build a React Start Project with Webpack</title><meta name="twitter:card" content="summary" /><meta name="twitter:site" content="@HeiswayiNrird" /><meta name="twitter:title" content="Build a React Start Project with Webpack" /><meta name="twitter:description" content="I went througth the Reactjs tutorial project recently, and would like to share how I built a comment box using Reactjs."><meta name="description" content="I went througth the Reactjs tutorial project recently, and would like to share how I built a comment box using Reactjs."><meta name="google-site-verification" content="epFgX0s_0RM3CdjwFcsewfXzPov2g8s9ZBOLyaIUH-o"><link rel="icon" href="/assets/favicon.png"><link rel="apple-touch-icon" href="/assets/touch-icon.png"><link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css"><link rel="stylesheet" href="/assets/core.css"><link rel="canonical" href="/notes/build-a-react-project-with-webpack"><link rel="alternate" type="application/atom+xml" title="Yang's Blog" href="/feed.xml" /></head><body><div class="navbar"> <a class="about" href="/about">About</a> <a class="github" href="https://github.com/YangLu89/">GitHub</a> <a class="resume" href="#">Resume</a></div><aside class="logo"> <a href="/"> <img src="http://www.gravatar.com/avatar/2b38b1b0e7e08b69379bd61582adf0c8.png?s=80" class="gravatar"> </a> <span class="logo-prompt">Back to Home</span></aside><div class="summary"><h1 class="title"> Yang Lu</h1><p class="intro"> Backend Engineer at BloomSky</p></div><main> <noscript><style> article .footnotes { display: block; }</style></noscript><article><div class="center"><h1>Build a React Start Project with Webpack</h1><time>January 27, 2016</time></div><div class="divider"></div><p>I went througth the Reactjs tutorial project recently, and would like to share how I built a comment box using Reactjs.</p><p>First, if you haven’t installed nodejs before on your machine, install nodejs first using command</p><p><strong>brew install node</strong></p><p>Make you project folder, inside your project folder ran command</p><p><strong>npm init</strong></p><p>Install React using commad</p><p><strong>npm install –save-dev react react-dom</strong></p><p>To compile the JSX to javascript you need to use babel, install babel using command</p><p><strong>npm install –save-dev babel babel-core babel-loader</strong></p><p>If you are using JS6 syntax, you need to install babel-preset</p><p><strong>npm install –save-dev babel babel-preset-react babel-preset-es2015</strong></p><p>And don’t forget to install webpack</p><p><strong>npm install webpack</strong></p><p>Now we are going to set up our project structure</p><div class="highlight"><pre><code class="language-html" data-lang="html">-project root
+  -config
+    webpack.config.js
+  -dist
+    bundle.js
+  -src
+    -app
+      components
+      Comment.js
+      CommentBox.js
+      CommentForm.js
+      CommentList.js
+    -client
+      -styles
+        bootstrap.min.css
+        main.css
+      client.js
+      index.html
+    -server
+      comments.json
+      server.js
+  package.json
+  README.md</code></pre></div><p>I put the webpack configuration file inside the config folder, you can also put other app configuration files inside this folder. The generated minified js file is placed under the dist folder.</p><p>Here is how I configured the webpack. The webpack will look for client.js and compile all the related js file into bundle.js.</p><div class="highlight"><pre><code class="language-html" data-lang="html">var path = require(&#39;path&#39;);
+
+module.exports = {  
+  entry: path.resolve(__dirname, &#39;../src/client/client.js&#39;),
+  output: {
+    path: path.resolve(__dirname, &#39;../dist&#39;),
+    filename: &#39;bundle.js&#39;
+  },
+  debug: true,
+  devtool: &quot;#eval-source-map&quot;,
+
+  module: {
+    loaders: [
+      {
+        test: /src\/.+.js$/,
+        exclude: /node_modules/,
+        loader: &#39;babel&#39;,
+        query:
+          {
+            presets:[&#39;es2015&#39;, &#39;react&#39;]
+          }
+      }
+    ]
+  }
+};</code></pre></div><p>You can check the <a href="https://facebook.github.io/react/docs/tutorial.html">Reactjs tutorial</a> for more specified explaination of the comments box project. Here I just made the comments box source code into four components – Comment.js, CommentBox.js, CommentForm.js, CommentList.js. The example Comment.js code is shown below, you check the complete source code of my project in <a href="https://github.com/YangLu89/Comment-Box">github</a>.</p><div class="highlight"><pre><code class="language-html" data-lang="html">import React from &#39;react&#39;;
+import marked from &#39;marked&#39;;
+
+class Comment extends React.Component {
+  rawMarkup() {
+    var rawMarkup = marked(this.props.children.toString(), {sanitize: true});
+    return { __html: rawMarkup };
+  }
+
+  render() {
+    return (
+      <span class="nt">&lt;div</span> <span class="na">className=</span><span class="s">&quot;comment&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;h3</span> <span class="na">className=</span><span class="s">&quot;commentAuthor&quot;</span><span class="nt">&gt;</span>
+          {this.props.author}
+        <span class="nt">&lt;/h3&gt;</span>
+        <span class="nt">&lt;span</span> <span class="na">className=</span><span class="s">&quot;commentContent&quot;</span> <span class="na">dangerouslySetInnerHTML=</span><span class="s">{this.rawMarkup()}</span> <span class="nt">/&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    );
+  }
+}
+
+export default Comment;</code></pre></div></article><div class="back"> <a href="/">Back</a></div></main></body></html>
